@@ -25,7 +25,7 @@ async function getKeywordData(keyword) {
   try {
     const accessToken = await getAccessToken();
 
-    const url = `https://googleads.googleapis.com/v16/customers/${process.env.GOOGLE_ADS_CUSTOMER_ID}:generateKeywordIdeas`;
+    const url = `https://googleads.googleapis.com/v17/customers/${process.env.GOOGLE_ADS_CUSTOMER_ID}/keywordPlans:generateKeywordIdeas`;
 
     const response = await axios.post(
       url,
