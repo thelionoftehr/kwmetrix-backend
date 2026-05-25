@@ -2,6 +2,9 @@
 
 const axios = require('axios');
 
+// ─────────────────────────────────────────────
+// Get Google OAuth Access Token
+// ─────────────────────────────────────────────
 async function getAccessToken() {
   const response = await axios.post(
     'https://oauth2.googleapis.com/token',
@@ -21,6 +24,9 @@ async function getAccessToken() {
   return response.data.access_token;
 }
 
+// ─────────────────────────────────────────────
+// Fetch Keyword Ideas
+// ─────────────────────────────────────────────
 async function getKeywordData(keyword) {
   try {
     const accessToken = await getAccessToken();
@@ -41,8 +47,6 @@ async function getKeywordData(keyword) {
           Authorization: `Bearer ${accessToken}`,
           'developer-token':
             process.env.GOOGLE_ADS_DEVELOPER_TOKEN,
-          'login-customer-id':
-            process.env.GOOGLE_ADS_CUSTOMER_ID,
           'Content-Type': 'application/json',
         },
       }
@@ -53,16 +57,22 @@ async function getKeywordData(keyword) {
     return {
       success: true,
       total: ideas.length,
+
       keywords: ideas.map((item) => ({
-        keyword: item.text,
+        keyword: item.text || '',
+
         volume:
           item.keywordIdeaMetrics?.avgMonthlySearches || 0,
+
         competition:
           item.keywordIdeaMetrics?.competition || 'UNKNOWN',
+
         cpc:
           item.keywordIdeaMetrics?.averageCpcMicros
-            ? item.keywordIdeaMetrics.averageCpcMicros /
-              1000000
+            ? (
+                item.keywordIdeaMetrics.averageCpcMicros /
+                1000000
+              ).toFixed(2)
             : 0,
       })),
     };
@@ -74,11 +84,14 @@ async function getKeywordData(keyword) {
 
     throw new Error(
       err.response?.data?.error?.message ||
-        err.message
+      err.message
     );
   }
 }
 
+// ─────────────────────────────────────────────
+// Health Check
+// ─────────────────────────────────────────────
 async function checkGoogleAdsConnection() {
   try {
     await getAccessToken();
@@ -94,6 +107,9 @@ async function checkGoogleAdsConnection() {
   }
 }
 
+// ─────────────────────────────────────────────
+// Export
+// ─────────────────────────────────────────────
 module.exports = {
   getKeywordData,
   checkGoogleAdsConnection,
